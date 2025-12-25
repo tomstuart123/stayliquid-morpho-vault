@@ -21,19 +21,23 @@ contract DeployVault is Script {
     address constant MORPHO_BLUE = 0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb;
     address constant ADAPTIVE_CURVE_IRM = 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC;
 
-    // Example USDC supply market on Morpho Blue (WETH collateral, 86% LLTV)
-    // This is a real market ID for USDC lending on mainnet
-    // Market: Users supply USDC, borrowers post WETH collateral
-    // You can find more markets at: https://app.morpho.org/ethereum
+    // Example USDC supply market on Morpho Blue
+    // Market ID: 0xb8fef900b383db2dbbf4458c7f46acf5b140f26d603a6d1829963f241b82510e (OETH/USDC)
+    // Note: This ID is for reference - the script creates custom market params below
+    // You can find active markets at: https://app.morpho.org/ethereum
     bytes32 constant EXAMPLE_MARKET_ID = 0xb8fef900b383db2dbbf4458c7f46acf5b140f26d603a6d1829963f241b82510e;
 
-    // Note: To find market params for a specific market ID, query Morpho Blue contract
-    // or check Morpho app. For this example, we'll use a common USDC/WETH market.
-    // These params are examples and should be verified for production use
+    // Example market parameters for a USDC/WETH market
+    // IMPORTANT: These are example values and MUST be verified for production use
+    // To find correct parameters for a specific market:
+    // 1. Visit https://app.morpho.org/ethereum
+    // 2. Select your desired market
+    // 3. Query the Morpho Blue contract to get exact market params
+    // 4. Verify the oracle address matches the market's oracle
     MarketParams exampleMarketParams = MarketParams({
         loanToken: USDC, // USDC is lent
         collateralToken: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2, // WETH collateral
-        oracle: 0x48F7E36EB6B826B2dF4B2E630B62Cd25e89E40e2, // Example Chainlink oracle
+        oracle: 0x48F7E36EB6B826B2dF4B2E630B62Cd25e89E40e2, // EXAMPLE oracle - MUST verify for production
         irm: ADAPTIVE_CURVE_IRM,
         lltv: 860000000000000000 // 86% LLTV
     });
@@ -86,6 +90,8 @@ contract DeployVault is Script {
         vm.stopBroadcast();
 
         // 5. Set Gates (requires timelock, done as curator)
+        // NOTE: Timelocks default to 0 on initial deployment, so submit() + set() can be called immediately
+        // In production with non-zero timelocks, there must be a waiting period between submit() and set()
         console.log("\n5. Setting Gates (as curator)...");
         vm.startBroadcast();
 
@@ -109,6 +115,7 @@ contract DeployVault is Script {
         vm.stopBroadcast();
 
         // 6. Deploy Morpho Adapter (for real market allocation)
+        // NOTE: Timelocks default to 0 on initial deployment
         console.log("\n6. Deploying Morpho Market Adapter...");
         vm.startBroadcast();
 
@@ -122,7 +129,7 @@ contract DeployVault is Script {
         adapter = MorphoMarketV1AdapterV2(morphoAdapterFactory.createMorphoMarketV1AdapterV2(address(vault)));
         console.log("   Adapter deployed at:", address(adapter));
 
-        // Add adapter to vault
+        // Add adapter to vault (submit + execute pattern, works with zero timelock)
         vault.submit(abi.encodeCall(IVaultV2.addAdapter, (address(adapter))));
         vault.addAdapter(address(adapter));
         console.log("   Adapter added to vault");
@@ -134,6 +141,8 @@ contract DeployVault is Script {
         vm.stopBroadcast();
 
         // 7. Configure Market Caps (as curator)
+        // NOTE: Timelocks default to 0 on initial deployment
+        // The caps control how much can be allocated to specific markets
         console.log("\n7. Configuring Market Caps...");
         vm.startBroadcast();
 
