@@ -34,19 +34,38 @@ contract VaultIntegrationTest is Test {
         bytes32 salt = keccak256("stayliquid-test");
         vault = factory.createVaultV2(admin, USDC, salt);
         
-        // Set sendAssetsGate
+        // Admin sets curator to admin (for simplified setup)
+        vm.prank(admin);
+        (bool success0,) = vault.call(
+            abi.encodeWithSignature("setCurator(address)", admin)
+        );
+        require(success0, "setCurator failed");
+        
+        // Submit setSendAssetsGate transaction (timelock defaults to 0)
+        bytes memory setSendAssetsGateData = abi.encodeWithSignature("setSendAssetsGate(address)", address(gate));
         vm.prank(admin);
         (bool success1,) = vault.call(
-            abi.encodeWithSignature("setSendAssetsGate(address)", address(gate))
+            abi.encodeWithSignature("submit(bytes)", setSendAssetsGateData)
         );
-        require(success1, "setSendAssetsGate failed");
+        require(success1, "submit setSendAssetsGate failed");
         
-        // Set receiveSharesGate
+        // Execute setSendAssetsGate (immediately executable since timelock is 0)
         vm.prank(admin);
-        (bool success2,) = vault.call(
-            abi.encodeWithSignature("setReceiveSharesGate(address)", address(gate))
+        (bool success2,) = vault.call(setSendAssetsGateData);
+        require(success2, "setSendAssetsGate failed");
+        
+        // Submit setReceiveSharesGate transaction
+        bytes memory setReceiveSharesGateData = abi.encodeWithSignature("setReceiveSharesGate(address)", address(gate));
+        vm.prank(admin);
+        (bool success3,) = vault.call(
+            abi.encodeWithSignature("submit(bytes)", setReceiveSharesGateData)
         );
-        require(success2, "setReceiveSharesGate failed");
+        require(success3, "submit setReceiveSharesGate failed");
+        
+        // Execute setReceiveSharesGate
+        vm.prank(admin);
+        (bool success4,) = vault.call(setReceiveSharesGateData);
+        require(success4, "setReceiveSharesGate failed");
         
         // Allowlist one user
         vm.prank(admin);
