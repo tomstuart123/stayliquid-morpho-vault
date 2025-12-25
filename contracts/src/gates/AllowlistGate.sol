@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {ISendAssetsGate, IReceiveSharesGate} from "../../lib/morpho-vault-v2/src/interfaces/IGate.sol";
+import {ISendAssetsGate, IReceiveSharesGate, ISendSharesGate, IReceiveAssetsGate} from "../../lib/morpho-vault-v2/src/interfaces/IGate.sol";
 
 /// @title AllowlistGate
 /// @notice Minimal allowlist gate for Morpho Vault V2
-/// @dev Implements ISendAssetsGate (deposit gating) and IReceiveSharesGate (holder gating)
+/// @dev Implements all four gate interfaces (ISendAssetsGate, IReceiveSharesGate, ISendSharesGate, IReceiveAssetsGate)
 /// @dev Gate functions never revert - default deny on failure
 /// @dev Admin setters can revert on authorization failures
 
-contract AllowlistGate is ISendAssetsGate, IReceiveSharesGate {
+contract AllowlistGate is ISendAssetsGate, IReceiveSharesGate, ISendSharesGate, IReceiveAssetsGate {
     /// @notice Admin address (EOA for v0.1, can transfer to multisig in v0.2)
     address public admin;
 
@@ -47,6 +47,22 @@ contract AllowlistGate is ISendAssetsGate, IReceiveSharesGate {
     /// @return true if account is allowed, false otherwise
     /// @dev MUST NEVER REVERT - returns false for non-allowed addresses
     function canReceiveShares(address account) external view override returns (bool) {
+        return allowed[account];
+    }
+
+    /// @notice Check if account can send shares (holder gating)
+    /// @param account Address to check (msg.sender in transfer/redeem operations)
+    /// @return true if account is allowed, false otherwise
+    /// @dev MUST NEVER REVERT - returns false for non-allowed addresses
+    function canSendShares(address account) external view override returns (bool) {
+        return allowed[account];
+    }
+
+    /// @notice Check if account can receive assets (withdrawal gating)
+    /// @param account Address to check (receiver in withdraw/redeem operations)
+    /// @return true if account is allowed, false otherwise
+    /// @dev MUST NEVER REVERT - returns false for non-allowed addresses
+    function canReceiveAssets(address account) external view override returns (bool) {
         return allowed[account];
     }
 

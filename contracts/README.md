@@ -23,8 +23,24 @@ $ forge build
 
 ### Test
 
+Run all tests:
 ```shell
 $ forge test
+```
+
+Run unit tests only:
+```shell
+$ forge test --match-path "test/AllowlistGate.t.sol"
+```
+
+Run integration tests (requires mainnet RPC URL):
+```shell
+# Copy .env.example to .env and add your mainnet RPC URL
+$ cp .env.example .env
+# Edit .env and set MAINNET_RPC_URL
+
+# Run integration tests
+$ forge test --match-path "test/VaultIntegration.t.sol" --fork-url $MAINNET_RPC_URL -vvv
 ```
 
 ### Format
