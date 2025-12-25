@@ -89,10 +89,11 @@ contract DeployVault is Script {
 
         vm.stopBroadcast();
 
-        // 5. Set Gates (requires timelock, done as curator)
+        // 5. Set Gates (requires timelock)
         // NOTE: Timelocks default to 0 on initial deployment, so submit() + set() can be called immediately
         // In production with non-zero timelocks, there must be a waiting period between submit() and set()
-        console.log("\n5. Setting Gates (as curator)...");
+        // These operations are performed by the admin (who is also initially the curator)
+        console.log("\n5. Setting Gates (as admin/curator)...");
         vm.startBroadcast();
 
         // Submit and accept gate changes via timelock
@@ -146,7 +147,8 @@ contract DeployVault is Script {
         console.log("\n7. Configuring Market Caps...");
         vm.startBroadcast();
 
-        // Encode market params to get the market ID
+        // Encode market params for allocation cap configuration
+        // This creates a unique identifier for this specific market configuration
         bytes memory marketIdData = abi.encode(exampleMarketParams);
 
         // Set allocation caps for the market
@@ -174,7 +176,8 @@ contract DeployVault is Script {
         console.log("");
         console.log("Market Configuration:");
         console.log("  Morpho Blue:", MORPHO_BLUE);
-        console.log("  Example Market ID:", vm.toString(EXAMPLE_MARKET_ID));
+        console.log("  Reference Market ID:", vm.toString(EXAMPLE_MARKET_ID));
+        console.log("  (Note: Actual market configured uses custom params above)");
         console.log("  Absolute Cap:", absoluteCap / 1e6, "USDC");
         console.log("  Relative Cap: 90%");
         console.log("");
