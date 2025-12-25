@@ -1,0 +1,3 @@
+[submodule "contracts/lib/morpho-vault-v2"]
+	path = contracts/lib/morpho-vault-v2
+	url = https://github.com/morpho-org/vault-v2.git
