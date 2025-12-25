@@ -28,6 +28,16 @@ contract AllowlistGateTest is Test {
         assertFalse(gate.canReceiveShares(user1));
         assertFalse(gate.canReceiveShares(user2));
         assertFalse(gate.canReceiveShares(admin));
+
+        // canSendShares returns false for non-allowed addresses
+        assertFalse(gate.canSendShares(user1));
+        assertFalse(gate.canSendShares(user2));
+        assertFalse(gate.canSendShares(admin));
+
+        // canReceiveAssets returns false for non-allowed addresses
+        assertFalse(gate.canReceiveAssets(user1));
+        assertFalse(gate.canReceiveAssets(user2));
+        assertFalse(gate.canReceiveAssets(admin));
     }
 
     /// @notice Test admin can setAllowed to allowlist a user
@@ -38,6 +48,8 @@ contract AllowlistGateTest is Test {
         assertTrue(gate.allowed(user1));
         assertTrue(gate.canSendAssets(user1));
         assertTrue(gate.canReceiveShares(user1));
+        assertTrue(gate.canSendShares(user1));
+        assertTrue(gate.canReceiveAssets(user1));
     }
 
     /// @notice Test admin can setAllowed to remove a user from allowlist
@@ -53,6 +65,8 @@ contract AllowlistGateTest is Test {
         assertFalse(gate.allowed(user1));
         assertFalse(gate.canSendAssets(user1));
         assertFalse(gate.canReceiveShares(user1));
+        assertFalse(gate.canSendShares(user1));
+        assertFalse(gate.canReceiveAssets(user1));
     }
 
     /// @notice Test admin can setAllowed multiple users
@@ -69,6 +83,10 @@ contract AllowlistGateTest is Test {
         assertTrue(gate.canSendAssets(user2));
         assertTrue(gate.canReceiveShares(user1));
         assertTrue(gate.canReceiveShares(user2));
+        assertTrue(gate.canSendShares(user1));
+        assertTrue(gate.canSendShares(user2));
+        assertTrue(gate.canReceiveAssets(user1));
+        assertTrue(gate.canReceiveAssets(user2));
     }
 
     /// @notice Test non-admin cannot setAllowed

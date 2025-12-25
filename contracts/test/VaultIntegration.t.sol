@@ -30,7 +30,6 @@ contract VaultIntegrationTest is Test {
 
     // Test amounts
     uint256 constant DEPOSIT_AMOUNT = 1000 * 1e6; // 1000 USDC
-    uint256 constant TRANSFER_AMOUNT = 100 * 1e6; // 100 USDC worth of shares
 
     function setUp() public {
         // Create mainnet fork
@@ -56,12 +55,16 @@ contract VaultIntegrationTest is Test {
         vault.setSymbol("TVT");
         vm.stopPrank();
 
-        // Setup gates through timelock mechanism
+        // Setup all gates through timelock mechanism
         vm.startPrank(curator);
         vault.submit(abi.encodeCall(IVaultV2.setSendAssetsGate, (address(gate))));
         vault.setSendAssetsGate(address(gate));
         vault.submit(abi.encodeCall(IVaultV2.setReceiveSharesGate, (address(gate))));
         vault.setReceiveSharesGate(address(gate));
+        vault.submit(abi.encodeCall(IVaultV2.setSendSharesGate, (address(gate))));
+        vault.setSendSharesGate(address(gate));
+        vault.submit(abi.encodeCall(IVaultV2.setReceiveAssetsGate, (address(gate))));
+        vault.setReceiveAssetsGate(address(gate));
         vm.stopPrank();
 
         // Fund test wallets from USDC whale
