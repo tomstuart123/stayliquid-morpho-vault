@@ -13,7 +13,6 @@ import {IERC20} from "../lib/morpho-vault-v2/src/interfaces/IERC20.sol";
 contract VaultIntegrationTest is Test {
     // Mainnet addresses
     address constant USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
-    address constant USDC_WHALE = 0x4B16c5dE96EB2117bBE5fd171E4d203624B014aa;
 
     // Test actors
     address public admin;
@@ -67,12 +66,10 @@ contract VaultIntegrationTest is Test {
         vault.setReceiveAssetsGate(address(gate));
         vm.stopPrank();
 
-        // Fund test wallets from USDC whale
-        vm.startPrank(USDC_WHALE);
-        usdc.transfer(allowlistedUser1, DEPOSIT_AMOUNT * 10);
-        usdc.transfer(allowlistedUser2, DEPOSIT_AMOUNT * 10);
-        usdc.transfer(nonAllowlistedUser, DEPOSIT_AMOUNT * 10);
-        vm.stopPrank();
+        // Fund test wallets using Foundry's deal cheat code
+        deal(USDC, allowlistedUser1, DEPOSIT_AMOUNT * 10);
+        deal(USDC, allowlistedUser2, DEPOSIT_AMOUNT * 10);
+        deal(USDC, nonAllowlistedUser, DEPOSIT_AMOUNT * 10);
 
         // Allowlist users
         vm.startPrank(admin);
