@@ -30,7 +30,7 @@ contract DeployVault is Script {
     address constant MF_ONE = 0x238a700eD6165261Cf8b2e544ba797BC11e466Ba;
 
     // Verified market parameters for MF-ONE-USDC
-    // All parameters verified from Morpho app on 2025-12-25
+    // All parameters verified from Morpho app on 2025-12-29
     MarketParams marketParams = MarketParams({
         loanToken: USDC,                                                // USDC is lent
         collateralToken: MF_ONE,                                       // mF-ONE collateral
