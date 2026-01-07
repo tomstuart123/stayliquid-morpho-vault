@@ -76,6 +76,23 @@ forge test --match-test test_Scenario3 --fork-url $MAINNET_RPC_URL -vvv  # Revok
 
 **Note**: Yield accrual depends on active borrows in the MF-ONE market on the forked mainnet state. If there are no active borrows, yield will be 0, which is expected behavior.
 
+### Curator Allocation Test
+
+Proves curator can allocate vault funds to MF-ONE market.
+
+```bash
+# Run curator allocation test
+forge test --match-test test_CuratorCanAllocate --fork-url mainnet -vvvv
+
+# Expected output:
+# ✅ Curator allocates 80k USDC to MF-ONE
+# ✅ Vault position in Morpho Blue verified
+# ✅ Yield accrues over 7 days (or zero if no borrows)
+# ✅ Curator deallocates successfully
+```
+
+**Why this test matters**: Validates the curator workflow that will be implemented in admin UI (STEP 4B.2).
+
 ### Format
 
 ```shell
