@@ -43,6 +43,39 @@ $ cp .env.example .env
 $ forge test --match-path "test/VaultIntegration.t.sol" --fork-url $MAINNET_RPC_URL -vvv
 ```
 
+### Full Integration Test
+
+Tests complete user journey: allowlist → deposit → yield → withdraw
+
+```bash
+# Run full integration test on mainnet fork
+source .env
+forge test --match-test test_FullIntegration --fork-url $MAINNET_RPC_URL -vvvv
+
+# Or run individual scenarios
+forge test --match-test test_Scenario1 --fork-url $MAINNET_RPC_URL -vvv  # Non-allowlisted user blocked
+forge test --match-test test_Scenario2 --fork-url $MAINNET_RPC_URL -vvv  # Full user journey
+forge test --match-test test_Scenario3 --fork-url $MAINNET_RPC_URL -vvv  # Revoked user blocked
+
+# Expected output:
+# ✅ Scenario 1: Non-allowlisted user blocked from deposit
+# ✅ Scenario 2: Allowlisted user deposits successfully
+# ✅ Scenario 2: Vault allocates to MF-ONE market
+# ✅ Scenario 2: Yield check completed (may be 0 if no borrows on fork)
+# ✅ Scenario 2: User withdraws deposit successfully
+# ✅ Scenario 3: Revoked user blocked from deposit and withdraw
+```
+
+**Test Coverage**: 
+- Allowlist gate enforcement (all 4 gate interfaces)
+- Vault deposits and withdrawals
+- Morpho Blue adapter allocation to MF-ONE-USDC market
+- Market cap configuration
+- Yield accrual over simulated time period
+- Revoked user access scenarios
+
+**Note**: Yield accrual depends on active borrows in the MF-ONE market on the forked mainnet state. If there are no active borrows, yield will be 0, which is expected behavior.
+
 ### Format
 
 ```shell
