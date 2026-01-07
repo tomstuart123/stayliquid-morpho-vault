@@ -221,6 +221,104 @@ cast call $GATE_ADDRESS "allowed(address)" $USER_ADDRESS \
     --rpc-url $MAINNET_RPC_URL
 ```
 
+### Managing the Allowlist (Batch)
+
+For managing multiple addresses efficiently, use the batch management script:
+
+#### Configuration
+
+1. Create a config file from the example:
+   ```bash
+   cp allowlist-config.example.json allowlist-config.json
+   ```
+
+2. Edit `allowlist-config.json` with your addresses:
+   ```json
+   {
+     "mode": "add",
+     "addresses": [
+       "0x0742D35CC6634c0532925A3b844bc9E7595f0Beb",
+       "0x1234567890123456789012345678901234567890",
+       "0xABcdEFABcdEFabcdEfAbCdefabcdeFABcDEFabCD"
+     ]
+   }
+   ```
+
+   **Config Fields**:
+   - `mode`: Either `"add"` (allowlist addresses) or `"remove"` (remove from allowlist)
+   - `addresses`: Array of Ethereum addresses to process (must be valid checksummed addresses)
+   
+   **Note**: Replace the example addresses above with your actual user addresses before running in production.
+
+#### Usage
+
+**Environment Variables**:
+- `GATE_ADDRESS` (required): Address of the deployed AllowlistGate contract
+- `ALLOWLIST_CONFIG_PATH` (optional): Path to config file (defaults to `allowlist-config.json`)
+
+**Dry Run** (simulate without broadcasting):
+```bash
+# Load environment
+source .env
+
+# Set gate address from deployment
+export GATE_ADDRESS=0x...  # from deployment output
+
+# Dry run - test adding addresses
+forge script script/ManageAllowlist.s.sol:ManageAllowlist \
+    --fork-url mainnet \
+    -vvvv
+```
+
+**Expected Output**:
+```
+=== Allowlist Batch Management ===
+Gate Address: 0x...
+Config File: allowlist-config.json
+
+Mode: add
+Addresses to process: 3
+
+Addresses:
+   1 . 0x0742D35CC6634c0532925A3b844bc9E7595f0Beb
+   2 . 0x1234567890123456789012345678901234567890
+   3 . 0xABcdEFABcdEFabcdEfAbCdefabcdeFABcDEFabCD
+
+Executing batch operation...
+
+=== Operation Complete ===
+Successfully added 3 addresses to allowlist
+```
+
+**Broadcast** (actually execute on-chain):
+```bash
+# Add addresses to allowlist
+forge script script/ManageAllowlist.s.sol:ManageAllowlist \
+    --fork-url mainnet \
+    --broadcast \
+    --private-key $ADMIN_PRIVATE_KEY \
+    -vvvv
+
+# For removing addresses, change mode in config to "remove" and run again
+```
+
+**Custom Config Path**:
+```bash
+# Use a different config file
+export ALLOWLIST_CONFIG_PATH=allowlist-production.json
+forge script script/ManageAllowlist.s.sol:ManageAllowlist \
+    --fork-url mainnet \
+    --broadcast \
+    --private-key $ADMIN_PRIVATE_KEY
+```
+
+**Verify Changes**:
+```bash
+# Check if an address is now allowed
+cast call $GATE_ADDRESS "allowed(address)" 0x0742D35CC6634c0532925A3b844bc9E7595f0Beb \
+    --rpc-url $MAINNET_RPC_URL
+```
+
 ### Allocating to Morpho Markets
 
 After deployment, the curator can allocate vault funds to Morpho Blue markets:
