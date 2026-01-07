@@ -247,6 +247,8 @@ For managing multiple addresses efficiently, use the batch management script:
    **Config Fields**:
    - `mode`: Either `"add"` (allowlist addresses) or `"remove"` (remove from allowlist)
    - `addresses`: Array of Ethereum addresses to process (must be valid checksummed addresses)
+   
+   **Note**: Replace the example addresses above with your actual user addresses before running in production.
 
 #### Usage
 
