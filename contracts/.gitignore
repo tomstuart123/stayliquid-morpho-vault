@@ -13,3 +13,6 @@ docs/
 # Dotenv file
 .env
 .env
+
+# Allowlist config (user-specific)
+allowlist-config.json
