@@ -82,7 +82,7 @@ Proves curator can allocate vault funds to MF-ONE market.
 
 ```bash
 # Run curator allocation test
-forge test --match-test test_CuratorCanAllocate --fork-url mainnet -vvvv
+forge test --match-test test_CuratorCanAllocateToMFOne --fork-url $MAINNET_RPC_URL -vvvv
 
 # Expected output:
 # ✅ Curator allocates 80k USDC to MF-ONE
