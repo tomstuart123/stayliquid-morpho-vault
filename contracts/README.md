@@ -237,9 +237,9 @@ For managing multiple addresses efficiently, use the batch management script:
    {
      "mode": "add",
      "addresses": [
-       "0x0742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+       "0x0742D35CC6634c0532925A3b844bc9E7595f0Beb",
        "0x1234567890123456789012345678901234567890",
-       "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd"
+       "0xABcdEFABcdEFabcdEfAbCdefabcdeFABcDEFabCD"
      ]
    }
    ```
@@ -278,9 +278,9 @@ Mode: add
 Addresses to process: 3
 
 Addresses:
-   1 . 0x0742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+   1 . 0x0742D35CC6634c0532925A3b844bc9E7595f0Beb
    2 . 0x1234567890123456789012345678901234567890
-   3 . 0xabcdefabcdefabcdefabcdefabcdefabcdefabcd
+   3 . 0xABcdEFABcdEFabcdEfAbCdefabcdeFABcDEFabCD
 
 Executing batch operation...
 
@@ -313,7 +313,7 @@ forge script script/ManageAllowlist.s.sol:ManageAllowlist \
 **Verify Changes**:
 ```bash
 # Check if an address is now allowed
-cast call $GATE_ADDRESS "allowed(address)" 0x0742d35Cc6634C0532925a3b844Bc9e7595f0bEb \
+cast call $GATE_ADDRESS "allowed(address)" 0x0742D35CC6634c0532925A3b844bc9E7595f0Beb \
     --rpc-url $MAINNET_RPC_URL
 ```
 
