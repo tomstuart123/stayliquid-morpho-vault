@@ -390,8 +390,8 @@ contract FullIntegrationTest is Test {
         vault.deposit(LARGE_DEPOSIT_AMOUNT, allowlistedUser);
         vm.stopPrank();
         
-        uint256 idleAssetsBefore = vault.totalAssets();
-        console.log("Vault total assets (idle):", idleAssetsBefore / 1e6, "USDC");
+        uint256 totalAssetsBefore = vault.totalAssets();
+        console.log("Vault total assets (idle):", totalAssetsBefore / 1e6, "USDC");
         
         // Step 2: Curator allocates to MF-ONE market
         console.log("\n--- Step 2: Curator allocates to MF-ONE ---");
@@ -403,7 +403,7 @@ contract FullIntegrationTest is Test {
         
         uint256 totalAssetsAfter = vault.totalAssets();
         console.log("Vault total assets after allocation:", totalAssetsAfter / 1e6, "USDC");
-        assertEq(totalAssetsAfter, idleAssetsBefore, "Total assets should remain same");
+        assertEq(totalAssetsAfter, totalAssetsBefore, "Total assets should remain same");
         
         // Step 3: Verify position in Morpho Blue
         console.log("\n--- Step 3: Verify Morpho Blue position ---");
@@ -437,7 +437,7 @@ contract FullIntegrationTest is Test {
         
         uint256 finalAssets = vault.totalAssets();
         console.log("Vault total assets after deallocation:", finalAssets / 1e6, "USDC");
-        assertGe(finalAssets, idleAssetsBefore, "Should have at least original amount");
+        assertGe(finalAssets, totalAssetsBefore, "Should have at least original amount");
         
         console.log("\nPASS: Curator allocation test complete\n");
     }
