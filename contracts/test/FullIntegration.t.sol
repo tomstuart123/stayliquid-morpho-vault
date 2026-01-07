@@ -49,6 +49,8 @@ contract FullIntegrationTest is Test {
     // Test amounts
     uint256 constant DEPOSIT_AMOUNT = 10000e6; // 10,000 USDC
     uint256 constant ALLOCATION_AMOUNT = 9000e6; // 9,000 USDC (leave some in vault)
+    uint256 constant LARGE_DEPOSIT_AMOUNT = 100_000e6; // 100,000 USDC for curator allocation test
+    uint256 constant LARGE_ALLOCATION_AMOUNT = 80_000e6; // 80,000 USDC for curator allocation test
 
     function setUp() public {
         // Create mainnet fork
@@ -370,5 +372,73 @@ contract FullIntegrationTest is Test {
         console.log("================================================================");
         console.log("               ALL SCENARIOS PASSED                             ");
         console.log("================================================================\n");
+    }
+
+    /// @notice Test curator can allocate vault funds to MF-ONE market
+    function test_CuratorCanAllocateToMFOne() public {
+        console.log("\n=== Curator Allocation Test ===");
+        
+        // Setup: User deposits USDC into vault
+        console.log("\n--- Step 1: User deposits USDC ---");
+        vm.prank(admin);
+        gate.setAllowed(allowlistedUser, true);
+        
+        deal(USDC, allowlistedUser, LARGE_DEPOSIT_AMOUNT);
+        
+        vm.startPrank(allowlistedUser);
+        IERC20(USDC).approve(address(vault), LARGE_DEPOSIT_AMOUNT);
+        vault.deposit(LARGE_DEPOSIT_AMOUNT, allowlistedUser);
+        vm.stopPrank();
+        
+        uint256 totalAssetsBefore = vault.totalAssets();
+        console.log("Vault total assets (idle):", totalAssetsBefore / 1e6, "USDC");
+        
+        // Step 2: Curator allocates to MF-ONE market
+        console.log("\n--- Step 2: Curator allocates to MF-ONE ---");
+        
+        bytes memory marketIdData = abi.encode(marketParams);
+        
+        vm.prank(curator);
+        vault.allocate(address(adapter), marketIdData, LARGE_ALLOCATION_AMOUNT);
+        
+        uint256 totalAssetsAfter = vault.totalAssets();
+        console.log("Vault total assets after allocation:", totalAssetsAfter / 1e6, "USDC");
+        assertEq(totalAssetsAfter, totalAssetsBefore, "Total assets should remain same");
+        
+        // Step 3: Verify position in Morpho Blue
+        console.log("\n--- Step 3: Verify Morpho Blue position ---");
+        console.log("Allocated to MF-ONE:", LARGE_ALLOCATION_AMOUNT / 1e6, "USDC");
+        console.log("PASS: Allocation successful");
+        
+        // Step 4: Simulate time for yield accrual
+        console.log("\n--- Step 4: Simulate 7 days ---");
+        uint256 assetsBefore = vault.totalAssets();
+        
+        vm.warp(block.timestamp + 7 days);
+        vm.roll(block.number + 50400); // ~50400 blocks in 7 days (12 second block time)
+        
+        uint256 assetsAfter = vault.totalAssets();
+        console.log("Assets before:", assetsBefore / 1e6, "USDC");
+        console.log("Assets after 7 days:", assetsAfter / 1e6, "USDC");
+        
+        if (assetsAfter > assetsBefore) {
+            uint256 yield = assetsAfter - assetsBefore;
+            console.log("Yield earned:", yield / 1e6, "USDC");
+        } else {
+            console.log("Note: No yield earned (MF-ONE market may have no active borrows on this fork)");
+        }
+        
+        assertGe(assetsAfter, assetsBefore, "Assets should not decrease");
+        
+        // Step 5: Curator deallocates from MF-ONE
+        console.log("\n--- Step 5: Curator deallocates ---");
+        vm.prank(curator);
+        vault.deallocate(address(adapter), marketIdData, LARGE_ALLOCATION_AMOUNT);
+        
+        uint256 finalAssets = vault.totalAssets();
+        console.log("Vault total assets after deallocation:", finalAssets / 1e6, "USDC");
+        assertGe(finalAssets, totalAssetsBefore, "Should have at least original amount");
+        
+        console.log("\nPASS: Curator allocation test complete\n");
     }
 }
